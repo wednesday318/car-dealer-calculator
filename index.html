@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>定价计算器</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#141c2f;--panel2:#1b263b;--line:#2b3850;--text:#eef3fb;--muted:#9eacc2;--accent:#7dd3fc;--green:#86efac;--red:#fca5a5}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#0b1020,#111827 60%,#101a2c);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:980px;margin:auto;padding:28px 16px 60px}.hero{padding:8px 2px 20px}.eyebrow{color:var(--accent);font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.hero h1{font-size:clamp(1.8rem,5vw,2.7rem);line-height:1.12;margin:.45rem 0}.hero p,.muted{color:var(--muted)}.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:rgba(20,28,47,.96);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}.card h2{font-size:1.1rem;margin:0 0 16px}.wide{grid-column:1/-1}.field{display:grid;gap:7px;margin:13px 0}.field label,.label{font-weight:650;font-size:.92rem}.hint{font-size:.82rem;color:var(--muted)}input,select{width:100%;min-width:0;background:#0d1527;color:var(--text);border:1px solid #3a4964;border-radius:10px;padding:11px 12px;font:inherit}input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}.choice-row{display:flex;flex-wrap:wrap;gap:9px}.choice{display:flex;align-items:center;gap:8px;background:#0d1527;border:1px solid #34435e;border-radius:10px;padding:10px 12px;cursor:pointer}.choice input{width:auto;accent-color:#7dd3fc}.slider-head,.line{display:flex;align-items:center;justify-content:space-between;gap:12px}.slider-head strong{font-size:1.1rem;color:var(--accent)}input[type=range]{padding:0;border:0;background:transparent;accent-color:#7dd3fc;cursor:pointer;margin:8px 0}.ticks{display:flex;justify-content:space-between;gap:6px;color:var(--muted);font-size:.72rem}.ticks span:last-child{text-align:right}.btn{border:1px solid #45617c;background:#24364d;color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}.btn:hover{filter:brightness(1.15)}.btn.primary{background:#075985;border-color:#0e7490}.price-box{background:#0d1527;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}.big{font-size:1.7rem;font-weight:850;letter-spacing:-.02em}.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{background:#0d1527;border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}.stat small{display:block;color:var(--muted);margin-bottom:5px}.stat strong{font-size:clamp(1.15rem,3vw,1.65rem);overflow-wrap:anywhere}.green{color:var(--green)}.red{color:var(--red)}.accent{color:var(--accent)}.pill{display:inline-block;border:1px solid var(--line);background:#0d1527;border-radius:999px;padding:5px 10px;font-size:.84rem}.footer{color:var(--muted);font-size:.82rem;text-align:center;padding:22px 4px}.separator{border:0;border-top:1px solid var(--line);margin:18px 0}.range-preset{background:#0d1527;border:1px solid var(--line);border-radius:12px;padding:14px}.copy-status{min-height:1.2em;color:var(--green);font-size:.85rem}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.wide{grid-column:auto}main{padding:18px 12px 40px}.card{padding:16px}.ticks{font-size:.65rem}.choice{flex:1 1 42%}.statgrid{gap:8px}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <div class="eyebrow">DEALERSHIP TOOL</div>
+  <h1>定价计算器</h1>
+  <p>车辆定价 · 折扣模拟 · 成本与单车利润实时计算</p>
+</header>
+<div class="layout">
+<section class="card">
+<h2>01 / 车辆信息</h2>
+<div class="field"><span class="label">车辆来源</span><div class="choice-row">
+<label class="choice"><input type="radio" name="source" value="original" checked> 原版车辆</label>
+<label class="choice"><input type="radio" name="source" value="vanilla"> 香草车</label>
+</div></div>
+<div class="field"><label for="kind">车辆类型</label><select id="kind"><option value="sedan">轿车</option><option value="suv">SUV</option><option value="sports">跑车</option><option value="super">超跑</option></select></div>
+<div class="field"><label for="carName">车辆名称</label><input id="carName" placeholder="输入车辆名称（可选）"></div>
+</section>
+<section class="card">
+<h2>02 / 成本设置</h2>
+<div class="field"><label for="cost">固定进货成本</label><input id="cost" type="number" min="0" value="65000"></div>
+<div class="field"><label for="other">其他单车成本</label><input id="other" type="number" min="0" value="0"></div>
+<div class="price-box"><div class="line muted"><span>基础成本合计</span><span id="baseCost" class="big">$65,000</span></div></div>
+</section>
+<section class="card">
+<h2>03 / 建议定价算法</h2>
+<div class="field">
+<div class="slider-head"><label for="marginTarget">目标利润率算法</label><strong id="marginLabel">30%</strong></div>
+<input id="marginTarget" type="range" min="5" max="80" step="5" value="30">
+<div class="ticks"><span>5%</span><span>40%</span><span>80%</span></div>
+<div class="line"><div><div class="hint">利润率算法建议价</div><strong id="marginSuggested" class="big">$92,857</strong></div><button class="btn" id="useMargin">采用此价格</button></div>
+<p class="hint">建议价 = 基础成本 ÷（1 − 目标利润率）</p>
+</div>
+<hr class="separator">
+<div class="field">
+<div class="slider-head"><label for="markupTarget">成本加价算法</label><strong id="markupLabel">40%</strong></div>
+<input id="markupTarget" type="range" min="0" max="200" step="5" value="40">
+<div class="ticks"><span>0%</span><span>100%</span><span>200%</span></div>
+<div class="line"><div><div class="hint">成本加价算法建议价</div><strong id="markupSuggested" class="big">$91,000</strong></div><button class="btn" id="useMarkup">采用此价格</button></div>
+<p class="hint">建议价 = 基础成本 ×（1 + 加价率）</p>
+</div>
+</section>
+<section class="card">
+<h2>04 / 建议价格区间来源</h2>
+<div class="field"><span class="label">选择区间方式</span>
+<label class="choice"><input type="radio" name="rangeMode" value="preset" checked> 按车辆类型显示预设区间</label>
+<label class="choice"><input type="radio" name="rangeMode" value="manual"> 自定义建议区间</label>
+</div>
+<div id="presetRange" class="range-preset"><div class="hint">根据车辆来源和类型自动显示</div><div id="presetName" style="font-weight:750;margin-top:5px">原版车辆 · 轿车</div><div id="presetValues" class="big accent">$30,000 – $50,000</div></div>
+<div id="manualRange" hidden>
+<div class="field"><label for="rangeLow">建议区间下限</label><input id="rangeLow" type="number" value="30000"></div>
+<div class="field"><label for="rangeHigh">建议区间上限</label><input id="rangeHigh" type="number" value="50000"></div>
+</div>
+<div class="line" style="margin-top:14px"><span class="muted">当前售价区间判断</span><span id="rangeStatus" class="pill">处于建议区间</span></div>
+</section>
+<section class="card wide">
+<h2>05 / 核心参考价与基础售价</h2>
+<p class="hint">核心参考价完全手动设置；切换车辆来源或类型不会自动修改它。</p>
+<div class="layout">
+<div class="field"><label for="reference">核心参考价</label><input id="reference" type="number" value="40000"><div class="line"><span class="hint">基础售价与参考价差额</span><strong id="referenceDelta">$0</strong></div><div class="hint" id="referencePct">差额比例：0.0%</div></div>
+<div class="field"><label for="price">手动基础售价</label><input id="price" type="number" value="40000"><div class="price-box"><div class="hint">当前基础售价</div><div class="big" id="priceDisplay">$40,000</div></div></div>
+</div>
+</section>
+<section class="card wide">
+<h2>06 / 促销折扣</h2>
+<div class="slider-head"><label for="discount">折扣滑块</label><strong id="discountLabel">不打折（原价）</strong></div>
+<input id="discount" type="range" min="0" max="17" step="1" value="17">
+<div class="ticks"><span>1折</span><span>3折</span><span>5折</span><span>7折</span><span>9折</span><span>原价</span></div>
+<div class="field"><label for="discountSelect">也可以从列表选择精确档位</label><select id="discountSelect"></select></div>
+<div class="statgrid">
+<div class="stat"><small>折扣优惠金额</small><strong id="discountAmount">$0</strong></div>
+<div class="stat"><small>折后成交价</small><strong id="salePrice" class="accent">$40,000</strong></div>
+</div>
+</section>
+<section class="card">
+<h2>07 / 赠品与同行价格</h2>
+<div class="field"><label for="gift">赠品实际成本</label><input id="gift" type="number" min="0" value="3000"><div class="hint">折后成交价达到 $100,000 时计入赠品成本。</div></div>
+<div class="line"><span class="muted">本次计入赠品成本</span><strong id="giftIncluded">$0</strong></div>
+<hr class="separator">
+<div class="field"><label for="competitor">同行参考售价</label><input id="competitor" type="number" min="0" value="100000"></div>
+<div class="line"><span class="muted">成交价与同行差额</span><strong id="competitorDelta">$-60,000</strong></div>
+</section>
+<section class="card">
+<h2>08 / 最终利润结果</h2>
+<div class="statgrid">
+<div class="stat"><small>折后成交价</small><strong id="finalSale">$40,000</strong></div>
+<div class="stat"><small>总成本</small><strong id="totalCost">$65,000</strong></div>
+<div class="stat"><small>单车利润</small><strong id="profit" class="red">-$25,000</strong></div>
+<div class="stat"><small>实际利润率</small><strong id="actualMargin" class="red">-62.5%</strong></div>
+</div>
+<div class="line" style="margin-top:14px"><span class="muted">利润状态</span><span id="profitStatus" class="pill red">亏损</span></div>
+<p class="hint">利润 = 折后成交价 − 进货成本 − 其他成本 − 符合条件的赠品成本。</p>
+<button class="btn primary" id="copyResult" style="width:100%;margin-top:10px">复制完整定价结果</button>
+<div id="copyStatus" class="copy-status" aria-live="polite"></div>
+</section>
+</div>
+<div class="footer">本计算器在当前浏览器本地计算，不会自动上传输入数据。</div>
+</main>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const bands = {
+ original:{sedan:[30000,50000],suv:[50000,100000],sports:[70000,120000],super:[90000,140000]},
+ vanilla:{sedan:[40000,60000],suv:[60000,120000],sports:[90000,150000],super:[120000,180000]}
+};
+const sourceNames={original:"原版车辆",vanilla:"香草车"};
+const kindNames={sedan:"轿车",suv:"SUV",sports:"跑车",super:"超跑"};
+const money=n=>"$"+Math.round(Number.isFinite(n)?n:0).toLocaleString("en-US");
+const val=id=>{const n=Number($(id).value);return Number.isFinite(n)?n:0};
+const selectedSource=()=>document.querySelector('input[name="source"]:checked').value;
+const selectedRangeMode=()=>document.querySelector('input[name="rangeMode"]:checked').value;
+const discountText=i=>i===17?"不打折（原价）":`${(1+i*.5).toFixed(1).replace(/\.0$/,"")}折`;
+for(let i=0;i<=17;i++){const op=document.createElement("option");op.value=i;op.textContent=discountText(i);$("discountSelect").appendChild(op);}
+function range(){return selectedRangeMode()==="preset"?bands[selectedSource()][$("kind").value]:[val("rangeLow"),val("rangeHigh")];}
+function calculate(){
+ const source=selectedSource(),kind=$("kind").value,baseCost=val("cost")+val("other"),price=val("price"),reference=val("reference"),d=Number($("discount").value);
+ const factor=d===17?1:(1+d*.5)/10,sale=price*factor,gift=sale>=100000?val("gift"):0,total=baseCost+gift,profit=sale-total,margin=sale>0?profit/sale*100:0;
+ const competitorDelta=sale-val("competitor"),delta=price-reference,rangeVals=range();
+ const marginTarget=val("marginTarget"),markupTarget=val("markupTarget"),marginSuggested=baseCost/(1-marginTarget/100),markupSuggested=baseCost*(1+markupTarget/100);
+ $("baseCost").textContent=money(baseCost);$("marginLabel").textContent=marginTarget+"%";$("markupLabel").textContent=markupTarget+"%";
+ $("marginSuggested").textContent=money(marginSuggested);$("markupSuggested").textContent=money(markupSuggested);
+ $("presetName").textContent=sourceNames[source]+" · "+kindNames[kind];$("presetValues").textContent=money(rangeVals[0])+" – "+money(rangeVals[1]);
+ $("presetRange").hidden=selectedRangeMode()!=="preset";$("manualRange").hidden=selectedRangeMode()!=="manual";
+ $("rangeStatus").textContent=price<rangeVals[0]?"低于建议区间":price>rangeVals[1]?"高于建议区间":"处于建议区间";
+ $("rangeStatus").className="pill "+(price>rangeVals[1]?"red":"green");
+ $("referenceDelta").textContent=(delta>0?"+":"")+money(delta);$("referenceDelta").className=delta>0?"red":delta<0?"green":"";
+ $("referencePct").textContent=reference===0?"差额比例：参考价为0，无法计算":"差额比例："+(delta>0?"+":"")+(delta/reference*100).toFixed(1)+"%";
+ $("priceDisplay").textContent=money(price);$("discountLabel").textContent=discountText(d);$("discountSelect").value=String(d);
+ $("discountAmount").textContent=money(price-sale);$("salePrice").textContent=money(sale);$("giftIncluded").textContent=money(gift);
+ $("competitorDelta").textContent=(competitorDelta>0?"+":"")+money(competitorDelta);$("competitorDelta").className=competitorDelta>0?"red":competitorDelta<0?"green":"";
+ $("finalSale").textContent=money(sale);$("totalCost").textContent=money(total);$("profit").textContent=(profit>0?"+":"")+money(profit);$("profit").className=profit<0?"red":"green";
+ $("actualMargin").textContent=margin.toFixed(1)+"%";$("actualMargin").className=margin<15?"red":"green";
+ const status=profit<0?"亏损":margin<15?"利润偏薄":"利润空间正常";$("profitStatus").textContent=status;$("profitStatus").className="pill "+(profit<0?"red":margin<15?"":"green");
+ window.currentResult=[
+ "定价计算器｜车辆定价结果",`车辆名称：${$("carName").value||"未填写"}`,`车辆来源：${sourceNames[source]}`,`车辆类型：${kindNames[kind]}`,
+ `基础售价：${money(price)}`,`核心参考价：${money(reference)}`,`相对参考价：${delta>0?"+":""}${money(delta)}${reference===0?"":`（${(delta/reference*100).toFixed(1)}%）`}`,
+ `建议区间：${money(rangeVals[0])} - ${money(rangeVals[1])}`,`区间判断：${$("rangeStatus").textContent}`,`进货成本：${money(val("cost"))}`,`其他成本：${money(val("other"))}`,
+ `目标利润率：${marginTarget}%`,`利润率算法建议价：${money(marginSuggested)}`,`成本加价率：${markupTarget}%`,`成本加价算法建议价：${money(markupSuggested)}`,
+ `促销折扣：${discountText(d)}`,`折后成交价：${money(sale)}`,`折扣优惠金额：${money(price-sale)}`,`赠品成本：${money(gift)}${sale>=100000?"（已计入）":"（未计入）"}`,
+ `总成本：${money(total)}`,`单车利润：${money(profit)}`,`实际利润率：${margin.toFixed(1)}%`,`同行参考价：${money(val("competitor"))}`,
+ `成交价与同行差额：${competitorDelta>0?"+":""}${money(competitorDelta)}`,`利润状态：${status}`].join("\n");
+}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener("input",calculate));
+document.querySelectorAll('input[name="source"],input[name="rangeMode"]').forEach(el=>el.addEventListener("change",calculate));
+$("discount").addEventListener("input",()=>{ $("discountSelect").value=$("discount").value;calculate();});
+$("discountSelect").addEventListener("change",()=>{$("discount").value=$("discountSelect").value;calculate();});
+$("useMargin").addEventListener("click",()=>{$("price").value=Math.round((val("cost")+val("other"))/(1-val("marginTarget")/100));calculate();});
+$("useMarkup").addEventListener("click",()=>{$("price").value=Math.round((val("cost")+val("other"))*(1+val("markupTarget")/100));calculate();});
+$("copyResult").addEventListener("click",async()=>{
+ try{await navigator.clipboard.writeText(window.currentResult);$("copyStatus").textContent="已复制完整定价结果，可以粘贴分享。";}
+ catch(e){const ta=document.createElement("textarea");ta.value=window.currentResult;document.body.appendChild(ta);ta.select();const ok=document.execCommand("copy");ta.remove();$("copyStatus").textContent=ok?"已复制完整定价结果，可以粘贴分享。":"浏览器未允许自动复制，请选择并复制结果文本。";if(!ok)window.prompt("请复制以下定价结果：",window.currentResult);}
+});
+calculate();
+})();
+</script>
+</body>
+</html>
